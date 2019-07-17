@@ -1,28 +1,27 @@
 import React from 'react';
 import { Switch, Route} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 import './App.css';
 import ShopPage from './pages/shop/shop.component';
 import Header from './components/header/header.component';
 import SignInAndSignUp from './pages/sign-in-and-sgin-up/sign-in-and-sgin-up.component'
 import {auth ,createUserProfileDocument} from './firebase/firebase.utils';
-
+import  {setCurrentUSer} from './redux/user/user.actions'
 
 import HomePage from './pages/homepage/homepage.component';
+import { dispatch } from 'rxjs/internal/observable/range';
 class App extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentUser:null
-    }
-  }
+  
 
   unsubscribezfromAuth =null;
 
 
 
   componentDidMount(){
+
+    const {setCurrentUSer} = this.props;
     this.unsubscribezfromAuth = auth.onAuthStateChanged( async userAuth => {
       
       //createUserProfileDocument(user);
@@ -30,17 +29,14 @@ class App extends React.Component {
         const userRef = await createUserProfileDocument(userAuth);
 
         userRef.onSnapshot(snapshot =>{
-          this.setState({
-            currentUser:{
+          setCurrentUSer({
               id:snapshot.id,
               ...snapshot.data()
-            }
+            });
           });
-        });
       }else {
-        this.setState({currentUser:userAuth})
+        setCurrentUSer(userAuth);
       }
-      console.log(this.state);
     });
   }
 
@@ -50,7 +46,7 @@ class App extends React.Component {
   render(){
     return (
       <div>
-      <Header currentUser = {this.state.currentUser}/>
+      <Header />
       <Switch>
        <Route exact path='/' component={HomePage}/>
         <Route exact path='/shop' component={ShopPage}/>
@@ -62,4 +58,8 @@ class App extends React.Component {
  
 }
 
-export default App;
+const mapDispatchToProps = dispatch => ({
+  setCurrentUSer:user => dispatch(setCurrentUSer(user))
+})
+
+export default connect(null,mapDispatchToProps)(App);
