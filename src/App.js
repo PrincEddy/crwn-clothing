@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route} from 'react-router-dom';
+import { Switch, Route, Redirect} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 import './App.css';
@@ -11,6 +11,7 @@ import  {setCurrentUSer} from './redux/user/user.actions'
 
 import HomePage from './pages/homepage/homepage.component';
 import { dispatch } from 'rxjs/internal/observable/range';
+
 class App extends React.Component {
 
   
@@ -50,7 +51,7 @@ class App extends React.Component {
       <Switch>
        <Route exact path='/' component={HomePage}/>
         <Route exact path='/shop' component={ShopPage}/>
-        <Route exact path='/signin' component={SignInAndSignUp}/>
+        <Route exact path='/signin' render={()=> this.props.currentUser?(<Redirect to='/'/>):(<SignInAndSignUp/>)}/>
       </Switch> 
       </div>
     );
@@ -58,8 +59,12 @@ class App extends React.Component {
  
 }
 
+const mapStateToProps = ({user}) => ({
+  currentUser:user.currentUser
+})
+
 const mapDispatchToProps = dispatch => ({
   setCurrentUSer:user => dispatch(setCurrentUSer(user))
 })
 
-export default connect(null,mapDispatchToProps)(App);
+export default connect(mapStateToProps,mapDispatchToProps)(App);
